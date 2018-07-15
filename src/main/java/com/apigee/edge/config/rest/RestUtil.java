@@ -38,13 +38,13 @@ import com.google.api.client.json.jackson.JacksonFactory;
 
 public class RestUtil {
 
-    static final HttpTransport HTTP_TRANSPORT = new NetHttpTransport();
-    static final JsonFactory JSON_FACTORY = new JacksonFactory();
+    private static final HttpTransport HTTP_TRANSPORT = new NetHttpTransport();
+    private static final JsonFactory JSON_FACTORY = new JacksonFactory();
     static String versionRevision;
-    static Logger logger = LoggerFactory.getLogger(RestUtil.class);
-    static String accessToken = null;
-    
-    static HttpRequestFactory REQUEST_FACTORY = HTTP_TRANSPORT
+    private static Logger logger = LoggerFactory.getLogger(RestUtil.class);
+    private static String accessToken = null;
+
+    private static HttpRequestFactory REQUEST_FACTORY = HTTP_TRANSPORT
             .createRequestFactory(new HttpRequestInitializer() {
                 // @Override
                 public void initialize(HttpRequest request) {
@@ -60,6 +60,14 @@ public class RestUtil {
     /***************************************************************************
      * Env Config - get, create, update
      **/
+    /**
+     *
+     * @param profile profile
+     * @param resource resource
+     * @param payload payload
+     * @return response from server
+     * @throws IOException IOException
+     */
     public static HttpResponse createEnvConfig(ServerProfile profile, 
                                                 String resource,
                                                 String payload)
@@ -91,6 +99,16 @@ public class RestUtil {
         return response;
     }
 
+    /**
+     *
+     * @param profile profile
+     * @param resource resource
+     * @param resourceId resource id
+     * @param subResource subResource
+     * @param payload payload
+     * @return response from server
+     * @throws IOException IOException
+     */
     public static HttpResponse createEnvConfig(ServerProfile profile,
                                                String resource,
                                                String resourceId,
@@ -108,6 +126,14 @@ public class RestUtil {
         return executeAPIPost(profile, payload, importCmd);
     }
 
+    /**
+     *
+     * @param profile profile
+     * @param resource resource
+     * @param filePath filePath
+     * @return response from server
+     * @throws IOException IOException
+     */
     public static HttpResponse createEnvConfigUpload(ServerProfile profile, String resource, String filePath)
 			throws IOException {
 		byte[] file = Files.readAllBytes(new File(filePath).toPath());
@@ -133,7 +159,16 @@ public class RestUtil {
 
 		return response;
 	}
-    
+
+    /**
+     *
+     * @param profile profile
+     * @param resource resource
+     * @param resourceId resource id
+     * @param payload payload
+     * @return response from server
+     * @throws IOException IOException
+     */
     public static HttpResponse updateEnvConfig(ServerProfile profile, 
                                                 String resource,
                                                 String resourceId,
@@ -167,6 +202,17 @@ public class RestUtil {
         return response;
     }
 
+    /**
+     *
+     * @param profile profile
+     * @param resource resource
+     * @param resourceId resource id
+     * @param subResource subResource
+     * @param subResourceId sub resource id
+     * @param payload payload
+     * @return response from server
+     * @throws IOException IOException
+     */
     public static HttpResponse updateEnvConfig(ServerProfile profile,
                                                String resource,
                                                String resourceId,
@@ -186,6 +232,15 @@ public class RestUtil {
         return executeAPIPost(profile, payload, importCmd);
     }
 
+    /**
+     *
+     * @param profile profile
+     * @param resource resource
+     * @param resourceId resource id
+     * @param filePath filePath
+     * @return response from server
+     * @throws IOException IOException
+     */
 	public static HttpResponse updateEnvConfigUpload(ServerProfile profile, String resource, String resourceId,
 			String filePath) throws IOException {
 
@@ -212,7 +267,15 @@ public class RestUtil {
 
 		return response;
 	}
-	
+
+    /**
+     *
+     * @param profile profile
+     * @param resource resource
+     * @param resourceId resource id
+     * @return response from server
+     * @throws IOException IOException
+     */
 	public static HttpResponse deleteEnvResourceFileConfig(ServerProfile profile, String resource, String resourceId)
 			throws IOException {
 
@@ -236,14 +299,31 @@ public class RestUtil {
 
 		return response;
 	}
-    
+
+    /**
+     *
+     * @param profile profile
+     * @param resource resource
+     * @param resourceId resource id
+     * @return response from server
+     * @throws IOException IOException
+     */
     public static HttpResponse deleteEnvConfig(ServerProfile profile, 
 									            String resource,
 									            String resourceId)
 	throws IOException {
     	return deleteEnvConfig(profile, resource, resourceId, null);
     }
-    
+
+    /**
+     *
+     * @param profile profile
+     * @param resource resource
+     * @param resourceId resource id
+     * @param payload payload
+     * @return response from server
+     * @throws IOException IOException
+     */
     public static HttpResponse deleteEnvConfig(ServerProfile profile, 
                                                 String resource,
                                                 String resourceId,
@@ -280,6 +360,13 @@ public class RestUtil {
         return response;
     }
 
+    /**
+     *
+     * @param profile profile
+     * @param resource resource
+     * @return response from server
+     * @throws IOException IOException
+     */
     public static HttpResponse getEnvConfig(ServerProfile profile, 
                                                 String resource) 
             throws IOException {
@@ -306,6 +393,16 @@ public class RestUtil {
         return response;
     }
 
+    /**
+     *
+     * @param profile profile
+     * @param resource resource
+     * @param resourceId resource id
+     * @param subResource subResource
+     * @param subResourceId sub resource id
+     * @return response from server
+     * @throws IOException IOException
+     */
     public static HttpResponse getEnvConfig(ServerProfile profile,
                                             String resource,
                                             String resourceId,
@@ -327,6 +424,15 @@ public class RestUtil {
     /***************************************************************************
      * Org Config - get, create, update
      **/
+
+    /**
+     *
+     * @param profile profile
+     * @param resource resource
+     * @param payload payload
+     * @return response from server
+     * @throws IOException IOException
+     */
     public static HttpResponse createOrgConfig(ServerProfile profile, 
                                                 String resource,
                                                 String payload)
@@ -357,6 +463,16 @@ public class RestUtil {
         return response;
     }
 
+    /**
+     *
+     * @param profile profile
+     * @param resource resource
+     * @param resourceId resource id
+     * @param subResource subResource
+     * @param payload payload
+     * @return response from server
+     * @throws IOException IOException
+     */
     public static HttpResponse createOrgConfig(ServerProfile profile,
                                                String resource,
                                                String resourceId,
@@ -372,7 +488,15 @@ public class RestUtil {
 
         return executeAPIPost(profile, payload, importCmd);
     }
-    
+
+    /**
+     *
+     * @param profile profile
+     * @param resource resource
+     * @param filePath filePath
+     * @return response from server
+     * @throws IOException IOException
+     */
 	public static HttpResponse createOrgConfigUpload(ServerProfile profile, String resource, String filePath)
 			throws IOException {
 		byte[] file = Files.readAllBytes(new File(filePath).toPath());
@@ -398,6 +522,15 @@ public class RestUtil {
 		return response;
 	}
 
+    /**
+     *
+     * @param profile profile
+     * @param resource resource
+     * @param resourceId resource id
+     * @param payload payload
+     * @return response from server
+     * @throws IOException IOException
+     */
     public static HttpResponse updateOrgConfig(ServerProfile profile, 
                                                 String resource,
                                                 String resourceId,
@@ -430,6 +563,17 @@ public class RestUtil {
         return response;
     }
 
+    /**
+     *
+     * @param profile profile
+     * @param resource resource
+     * @param resourceId resource id
+     * @param subResource subResource
+     * @param subResourceId sub resource id
+     * @param payload payload
+     * @return response from server
+     * @throws IOException IOException
+     */
     public static HttpResponse updateOrgConfig(ServerProfile profile,
                                                String resource,
                                                String resourceId,
@@ -447,7 +591,16 @@ public class RestUtil {
 
         return executeAPIPost(profile, payload, importCmd);
     }
-    
+
+    /**
+     *
+     * @param profile profile
+     * @param resource resource
+     * @param resourceId resource id
+     * @param filePath filePath
+     * @return response from server
+     * @throws IOException IOException
+     */
 	public static HttpResponse updateOrgConfigUpload(ServerProfile profile, 
 													String resource,
 													String resourceId,
@@ -476,6 +629,14 @@ public class RestUtil {
 		return response;
 	}
 
+    /**
+     *
+     * @param profile profile
+     * @param resource resource
+     * @param resourceId resource id
+     * @return response from server
+     * @throws IOException IOException
+     */
     public static HttpResponse deleteOrgConfig(ServerProfile profile, 
                                                 String resource,
                                                 String resourceId)
@@ -503,7 +664,15 @@ public class RestUtil {
 
         return response;
     }
-    
+
+    /**
+     *
+     * @param profile profile
+     * @param resource resource
+     * @param resourceId resource id
+     * @return response from server
+     * @throws IOException IOException
+     */
 	public static HttpResponse deleteOrgResourceFileConfig(ServerProfile profile, String resource, String resourceId)
 			throws IOException {
 
@@ -527,6 +696,13 @@ public class RestUtil {
 		return response;
 	}
 
+    /**
+     *
+     * @param profile profile
+     * @param resource resource
+     * @return response from server
+     * @throws IOException IOException
+     */
     public static HttpResponse getOrgConfig(ServerProfile profile, 
                                                 String resource) 
             throws IOException {
@@ -552,6 +728,16 @@ public class RestUtil {
         return response;
     }
 
+    /**
+     *
+     * @param profile profile
+     * @param resource resource
+     * @param resourceId resource id
+     * @param subResource subResource
+     * @param subResourceId sub resource id
+     * @return response from server
+     * @throws IOException IOException
+     */
     public static HttpResponse getOrgConfig(ServerProfile profile,
                                             String resource,
                                             String resourceId,
@@ -572,6 +758,16 @@ public class RestUtil {
     /***************************************************************************
      * API Config - get, create, update
      **/
+
+    /**
+     *
+     * @param profile profile
+     * @param api API
+     * @param resource resource
+     * @param payload payload
+     * @return response from server
+     * @throws IOException IOException
+     */
         public static HttpResponse createAPIConfig(ServerProfile profile, 
                                                     String api,
                                                     String resource,
@@ -604,6 +800,17 @@ public class RestUtil {
         return response;
     }
 
+    /**
+     *
+     * @param profile profile
+     * @param api API
+     * @param resource resource
+     * @param resourceId resource id
+     * @param subResource subResource
+     * @param payload payload
+     * @return response from server
+     * @throws IOException IOException
+     */
     public static HttpResponse createAPIConfig(ServerProfile profile,
                                                String api,
                                                String resource,
@@ -621,7 +828,16 @@ public class RestUtil {
 
         return executeAPIPost(profile, payload, importCmd);
     }
-        
+
+    /**
+     *
+     * @param profile profile
+     * @param api API
+     * @param resource resource
+     * @param filePath filePath
+     * @return response from server
+     * @throws IOException IOException
+     */
         public static HttpResponse createAPIConfigUpload(ServerProfile profile, String api, String resource, String filePath)
     			throws IOException {
     		byte[] file = Files.readAllBytes(new File(filePath).toPath());
@@ -648,6 +864,16 @@ public class RestUtil {
     		return response;
     	}
 
+    /**
+     *
+     * @param profile profile
+     * @param api API
+     * @param resource resource
+     * @param resourceId resource id
+     * @param payload payload
+     * @return response from server
+     * @throws IOException IOException
+     */
     public static HttpResponse updateAPIConfig(ServerProfile profile, 
                                                 String api,
                                                 String resource,
@@ -682,6 +908,18 @@ public class RestUtil {
         return response;
     }
 
+    /**
+     *
+     * @param profile profile
+     * @param api API
+     * @param resource resource
+     * @param resourceId resource id
+     * @param subResource subResource
+     * @param subResourceId sub resource id
+     * @param payload payload
+     * @return response from server
+     * @throws IOException IOException
+     */
     public static HttpResponse updateAPIConfig(ServerProfile profile,
                                                String api,
                                                String resource,
@@ -701,7 +939,17 @@ public class RestUtil {
 
         return executeAPIPost(profile, payload, importCmd);
     }
-    
+
+    /**
+     *
+     * @param profile profile
+     * @param api API
+     * @param resource resource
+     * @param resourceId resource id
+     * @param filePath filePath
+     * @return response from server
+     * @throws IOException IOException
+     */
     public static HttpResponse updateAPIConfigUpload(ServerProfile profile, String api, String resource, String resourceId,
 			String filePath) throws IOException {
 
@@ -729,6 +977,15 @@ public class RestUtil {
 		return response;
 	}
 
+    /**
+     *
+     * @param profile profile
+     * @param api API
+     * @param resource resource
+     * @param resourceId resource id
+     * @return response from server
+     * @throws IOException IOException
+     */
     public static HttpResponse deleteAPIConfig(ServerProfile profile, 
                                                 String api,
                                                 String resource,
@@ -760,6 +1017,14 @@ public class RestUtil {
         return response;
     }
 
+    /**
+     *
+     * @param profile profile
+     * @param api API
+     * @param resource resource
+     * @return response from server
+     * @throws IOException IOException
+     */
     public static HttpResponse getAPIConfig(ServerProfile profile,
                                                 String api,
                                                 String resource) 
@@ -787,6 +1052,16 @@ public class RestUtil {
         return response;
     }
 
+    /**
+     * @param profile server profile
+     * @param api API
+     * @param resource resource
+     * @param resourceId resource id
+     * @param subResource sub-resource
+     * @param subResourceId sub-resource id
+     * @return response from server
+     * @throws IOException IOException
+     */
     public static HttpResponse getAPIConfig(ServerProfile profile,
                                             String api,
                                             String resource,
@@ -806,6 +1081,14 @@ public class RestUtil {
         return executeAPIGet(profile, importCmd);
     }
 
+    /**
+     * @param profile server profile
+     * @param api API
+     * @param resource resource
+     * @param resourceId resource id
+     * @return response from server
+     * @throws IOException IOException
+     */
     public static HttpResponse deleteAPIResourceFileConfig(ServerProfile profile, String api, String resource, String resourceId)
 			throws IOException {
 
@@ -829,7 +1112,11 @@ public class RestUtil {
 
 		return response;
 	}
-    
+
+    /**
+     * @param profile server profile
+     * @throws IOException IOException
+     */
     public static void initMfa(ServerProfile profile) throws IOException {
 
     	// any simple get request can be used to - we just need to get an access token
@@ -1003,11 +1290,11 @@ public class RestUtil {
     
     /**
      * This method is used to validate the Bearer token. It validates the source and the expiration and if the token is about to expire in 30 seconds, set as invalid token
-     * @param accessToken
-     * @param profile
-     * @param clientId
-     * @return
-     * @throws IOException
+     * @param accessToken access token
+     * @param profile profile
+     * @param clientId client id
+     * @return true if valid, false otherwise
+     * @throws IOException IOException
      */
     private static boolean isValidBearerToken(String accessToken, ServerProfile profile, String clientId) throws IOException{
     	boolean isValid = false;

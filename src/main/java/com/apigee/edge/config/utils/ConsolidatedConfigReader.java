@@ -17,22 +17,16 @@ package com.apigee.edge.config.utils;
 
 import java.io.File;
 import java.io.BufferedReader;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.List;
 import java.util.Set;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Iterator;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
-import org.w3c.dom.NodeList;
 
-import org.json.simple.JSONValue;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -50,10 +44,15 @@ public class ConsolidatedConfigReader {
 
     /**
      * Example Hierarchy
-     * envConfig.cache.<env>.caches
-     * 
-     * Returns List of
-     * [ {cache1}, {cache2}, {cache3} ]
+     * envConfig.cache.{env}.caches
+     *
+     * @param resource resource
+     * @param configFile configuration file
+     * @param env environment
+     * @param scope scope
+     * @return List of [ {cache1}, {cache2}, {cache3} ]
+     * @throws ParseException ParseException
+     * @throws IOException IOException
      */
     public static List getEnvConfig(String env, 
                                      File configFile, 
@@ -86,13 +85,9 @@ public class ConsolidatedConfigReader {
                 out.add(((JSONObject)config).toJSONString());
             }
         }
-        catch(IOException ie) {
+        catch(IOException | ParseException ie) {
             logger.info(ie.getMessage());
             throw ie;
-        }
-        catch(ParseException pe) {
-            logger.info(pe.getMessage());
-            throw pe;
         }
 
         return out;
@@ -102,8 +97,12 @@ public class ConsolidatedConfigReader {
          * Example Hierarchy
          * orgConfig.apiProducts
          *
-         * Returns List of
-         * [ {apiProduct1}, {apiProduct2}, {apiProduct3} ]
+         * @param configFile configuration file
+         * @param scope scope
+         * @param resource resource
+         * @return  List of [ {apiProduct1}, {apiProduct2}, {apiProduct3} ]
+         * @throws ParseException ParseException
+         * @throws IOException IOException
          */
     public static List getOrgConfig(File configFile,
                                  String scope,
@@ -132,13 +131,9 @@ public class ConsolidatedConfigReader {
                 out.add(((JSONObject)config).toJSONString());
             }
         }
-        catch(IOException ie) {
+        catch(IOException | ParseException ie) {
             logger.info(ie.getMessage());
             throw ie;
-        }
-        catch(ParseException pe) {
-            logger.info(pe.getMessage());
-            throw pe;
         }
 
         return out;
@@ -146,10 +141,14 @@ public class ConsolidatedConfigReader {
 
     /**
      * Example Hierarchy
-     * orgConfig.developerApps.<developerId>.apps
-     * 
-     * Returns Map of
-     * <developerId> => [ {app1}, {app2}, {app3} ]
+     * orgConfig.developerApps.{developerId}.apps
+     *
+     * @param configFile configuration file
+     * @param resource resource
+     * @param scope scope
+     * @return Map of developerId: [ {app1}, {app2}, {app3} ]
+     * @throws ParseException ParseException
+     * @throws IOException IOException
      */
     public static Map<String, List<String>> getOrgConfigWithId(File configFile,
                                                              String scope,
@@ -190,13 +189,9 @@ public class ConsolidatedConfigReader {
             }
 
         }
-        catch(IOException ie) {
+        catch(IOException | ParseException ie) {
             logger.info(ie.getMessage());
             throw ie;
-        }
-        catch(ParseException pe) {
-            logger.info(pe.getMessage());
-            throw pe;
         }
 
         return out;
@@ -204,6 +199,11 @@ public class ConsolidatedConfigReader {
 
     /**
      * List of APIs under apiConfig
+     *
+     * @param configFile configuration file
+     * @return list of all APIs
+     * @throws ParseException ParseException
+     * @throws IOException IOException
      */
     public static Set<String> getAPIList(File configFile)
             throws ParseException, IOException {
@@ -240,8 +240,12 @@ public class ConsolidatedConfigReader {
 
 
     /**
-     * API Config
-     * [ {apiProduct1}, {apiProduct2}, {apiProduct3} ]
+     * @param configFile configuration file
+     * @param resource resource
+     * @param api API
+     * @return API Config [ {apiProduct1}, {apiProduct2}, {apiProduct3} ]
+     * @throws ParseException ParseException
+     * @throws IOException IOException
      */
     public static List getAPIConfig(File configFile,
                                      String api,
@@ -273,13 +277,9 @@ public class ConsolidatedConfigReader {
                 out.add(((JSONObject)config).toJSONString());
             }
         }
-        catch(IOException ie) {
+        catch(IOException | ParseException ie) {
             logger.info(ie.getMessage());
             throw ie;
-        }
-        catch(ParseException pe) {
-            logger.info(pe.getMessage());
-            throw pe;
         }
 
         return out;

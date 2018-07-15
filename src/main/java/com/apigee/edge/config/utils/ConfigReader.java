@@ -26,10 +26,13 @@ public class ConfigReader {
 
     /**
      * Example Hierarchy
-     * envConfig.cache.<env>.caches
+     * envConfig.cache.{env}.caches
      *
-     * Returns List of
-     * [ {cache1}, {cache2}, {cache3} ]
+     * @param env environment
+     * @param configFile configuration file
+     * @return list of [ {cache1}, {cache2}, {cache3} ]
+     * @throws IOException IOException
+     * @throws ParseException ParseException
      */
     public static List getEnvConfig(String env, File configFile) throws ParseException, IOException {
         return getListConfig(configFile);
@@ -38,7 +41,10 @@ public class ConfigReader {
     /**
      * Example hierarchy orgConfig.apiProducts
      *
+     * @param configFile configuration file
      * @return List of JSON strings, e.g. [ {apiProduct1}, {apiProduct2}, {apiProduct3} ]
+     * @throws IOException IOException
+     * @throws ParseException ParseException
      */
 
     // TODO convert parse exception error message more human friendly
@@ -90,10 +96,12 @@ public class ConfigReader {
 
     /**
      * Example Hierarchy
-     * orgConfig.developerApps.<developerId>.apps
+     * orgConfig.developerApps.{developerId}.apps
      *
-     * Returns Map of
-     * <developerId> => [ {app1}, {app2}, {app3} ]
+     * @param configFile configuration file
+     * @return Map of developerId: [ {app1}, {app2}, {app3} ]
+     * @throws IOException IOException
+     * @throws ParseException ParseException
      */
     public static Map<String, List<String>> getOrgConfigWithId(File configFile) throws ParseException, IOException {
         Logger logger = LoggerFactory.getLogger(ConfigReader.class);
@@ -145,7 +153,8 @@ public class ConfigReader {
     }
 
     /**
-     * List of APIs under configDir/api
+     * @param apiConfigDir apiConfigDir
+     * @return list of APIs under configDir/api
      */
     public static Set<String> getAPIList(String apiConfigDir) {
         File[] baseDir = Optional.ofNullable(new File(apiConfigDir).listFiles())
@@ -160,8 +169,10 @@ public class ConfigReader {
     }
 
     /**
-     * API Config
-     * [ {apiProduct1}, {apiProduct2}, {apiProduct3} ]
+     * @param configFile configuration file
+     * @return [ {apiProduct1}, {apiProduct2}, {apiProduct3} ]
+     * @throws IOException IOException
+     * @throws ParseException ParseException
      */
     public static List getAPIConfig(File configFile) throws ParseException, IOException {
         return getListConfig(configFile);

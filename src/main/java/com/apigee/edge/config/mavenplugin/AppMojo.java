@@ -1,12 +1,12 @@
 /**
  * Copyright (C) 2016 Apigee Corporation
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *         http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,154 +17,135 @@ package com.apigee.edge.config.mavenplugin;
 
 import com.apigee.edge.config.rest.RestUtil;
 import com.apigee.edge.config.utils.ServerProfile;
-
-import org.apache.maven.plugins.annotations.LifecyclePhase;
-import org.apache.maven.plugins.annotations.Mojo;
-import org.apache.maven.plugins.annotations.Parameter;
-import org.apache.maven.plugins.annotations.ResolutionScope;
-import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.MojoFailureException;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import com.google.api.client.http.HttpResponse;
+import com.google.api.client.http.HttpResponseException;
 import com.google.api.client.util.Key;
 import com.google.gson.Gson;
 import com.google.gson.JsonParseException;
-
-import java.io.IOException;
-import java.net.URLEncoder;
-import java.io.File;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Map;
-
-import org.apache.commons.io.FileUtils;
-
-import com.google.api.client.http.*;
-import org.json.simple.JSONValue;
+import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
+import org.apache.maven.plugins.annotations.Mojo;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**                                                                                                                                     ¡¡
  * Goal to create Apps in Apigee EDGE
  * scope: org
  *
  * @author madhan.sadasivam
- * @goal apps
- * @phase install
  */
+@Mojo(name = "apps", defaultPhase = LifecyclePhase.INSTALL)
+public class AppMojo extends GatewayAbstractMojo {
+    private static Logger logger = LoggerFactory.getLogger(AppMojo.class);
+    private static final String ____ATTENTION_MARKER____ =
+            "************************************************************************";
 
-public class AppMojo extends GatewayAbstractMojo
-{
-	static Logger logger = LoggerFactory.getLogger(AppMojo.class);
-	public static final String ____ATTENTION_MARKER____ =
-	"************************************************************************";
-
-	enum OPTIONS {
-		none, create, update, delete, sync
-	}
-
-	OPTIONS buildOption = OPTIONS.none;
-
-	private ServerProfile serverProfile;
-
-    public static class App {
-        @Key
-        public String name;
+    enum OPTIONS {
+        none, create, update, delete, sync
     }
-	
-	public AppMojo() {
-		super();
 
-	}
-	
-	public void init() throws MojoFailureException {
-		try {
-			logger.info(____ATTENTION_MARKER____);
-			logger.info("Apigee App");
-			logger.info(____ATTENTION_MARKER____);
+    private OPTIONS buildOption = OPTIONS.none;
 
-			String options="";
-			serverProfile = super.getProfile();			
-	
-			options = super.getOptions();
-			if (options != null) {
-				buildOption = OPTIONS.valueOf(options);
-			}
-			logger.debug("Build option " + buildOption.name());
-			logger.debug("Base dir " + super.getBaseDirectoryPath());
-		} catch (IllegalArgumentException e) {
-			throw new RuntimeException("Invalid apigee.option provided");
-		} catch (RuntimeException e) {
-			throw e;
-		}
+    private ServerProfile serverProfile;
 
-	}
+    static class App {
+        @Key
+        String name;
+    }
 
-	protected String getAppName(String payload) 
+    private void init() {
+        try {
+            logger.info(____ATTENTION_MARKER____);
+            logger.info("Apigee App");
+            logger.info(____ATTENTION_MARKER____);
+
+            String options = "";
+            serverProfile = super.getProfile();
+
+            options = super.getOptions();
+            if (options != null) {
+                buildOption = OPTIONS.valueOf(options);
+            }
+            logger.debug("Build option " + buildOption.name());
+            logger.debug("Base dir " + super.getBaseDirectoryPath());
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("Invalid apigee.option provided");
+        }
+
+    }
+
+    private String getAppName(String payload)
             throws MojoFailureException {
-		Gson gson = new Gson();
-		try {
-			App app = gson.fromJson(payload, App.class);
-			return app.name;
-		} catch (JsonParseException e) {
-		  throw new MojoFailureException(e.getMessage());
-		}
-	}
+        Gson gson = new Gson();
+        try {
+            App app = gson.fromJson(payload, App.class);
+            return app.name;
+        } catch (JsonParseException e) {
+            throw new MojoFailureException(e.getMessage());
+        }
+    }
 
-	protected void doUpdate(Map<String, List<String>> devApps) 
+    private void doUpdate(Map<String, List<String>> devApps)
             throws MojoFailureException {
-		try {
-			List existingApps = null;
-			if (buildOption != OPTIONS.update && 
-                buildOption != OPTIONS.create &&
-				buildOption != OPTIONS.delete &&
-                buildOption != OPTIONS.sync) {
-				return;
-			}
+        try {
+            List existingApps = null;
+            if (buildOption != OPTIONS.update &&
+                    buildOption != OPTIONS.create &&
+                    buildOption != OPTIONS.delete &&
+                    buildOption != OPTIONS.sync) {
+                return;
+            }
 
             for (Map.Entry<String, List<String>> entry : devApps.entrySet()) {
 
-            	logger.info("Retrieving Apps of " + entry.getKey());
+                logger.info("Retrieving Apps of " + entry.getKey());
                 String developerId = URLEncoder.encode(entry.getKey(), "UTF-8");
                 existingApps = getApp(serverProfile, developerId);
 
-    	        for (String app : entry.getValue()) {
-    	        	String appName = getAppName(app);
-    	        	if (appName == null) {
-    	        		throw new IllegalArgumentException(
-    	        			"App does not have a name.\n" + app + "\n");
-    	        	}
+                for (String app : entry.getValue()) {
+                    String appName = getAppName(app);
+                    if (appName == null) {
+                        throw new IllegalArgumentException(
+                                "App does not have a name.\n" + app + "\n");
+                    }
 
-            		if (existingApps.contains(appName)) {
+                    if (existingApps.contains(appName)) {
                         switch (buildOption) {
                             case update:
-                                logger.info("App \"" + appName + 
-                                                        "\" exists. Updating.");
+                                logger.info("App \"" + appName +
+                                        "\" exists. Updating.");
                                 updateApp(serverProfile, developerId,
-                                                        appName, app);
+                                        appName, app);
                                 break;
                             case create:
-                                logger.info("App \"" + appName + 
-                                                "\" already exists. Skipping.");
+                                logger.info("App \"" + appName +
+                                        "\" already exists. Skipping.");
                                 break;
                             case delete:
-                                logger.info("App \"" + appName + 
-                                                "\" already exists. Deleting.");
+                                logger.info("App \"" + appName +
+                                        "\" already exists. Deleting.");
                                 deleteApp(serverProfile, developerId, appName);
                                 break;
                             case sync:
-                                logger.info("App \"" + appName + 
-                                                "\" already exists. Deleting and recreating.");
+                                logger.info("App \"" + appName +
+                                        "\" already exists. Deleting and recreating.");
                                 deleteApp(serverProfile, developerId, appName);
                                 logger.info("Creating App - " + appName);
                                 createApp(serverProfile, developerId, app);
                                 break;
                         }
-    	        	} else {
+                    } else {
                         switch (buildOption) {
                             case create:
                             case sync:
@@ -173,127 +154,106 @@ public class AppMojo extends GatewayAbstractMojo
                                 createApp(serverProfile, developerId, app);
                                 break;
                             case delete:
-                                logger.info("App \"" + appName + 
-                                                "\" does not exist. Skipping.");
+                                logger.info("App \"" + appName +
+                                        "\" does not exist. Skipping.");
                                 break;
                         }
-    	        	}
-    			}
-            }
-		
-		} catch (IOException e) {
-			throw new MojoFailureException("Apigee network call error " +
-														 e.getMessage());
-		} catch (RuntimeException e) {
-			throw e;
-		}
-	}
-
-	/** 
-	 * Entry point for the mojo.
-	 */
-	public void execute() throws MojoExecutionException, MojoFailureException {
-
-		if (super.isSkip()) {
-			getLog().info("Skipping");
-			return;
-		}
-
-		Logger logger = LoggerFactory.getLogger(AppMojo.class);
-
-		try {
-			
-			init();
-
-			if (buildOption == OPTIONS.none) {
-				logger.info("Skipping Apps (default action)");
-				return;
-			}
-
-            if (serverProfile.getEnvironment() == null) {
-                throw new MojoExecutionException(
-                            "Apigee environment not found in profile");
+                    }
+                }
             }
 
-			Map<String, List<String>> apps = getOrgConfigWithId(logger, "developerApps");
-			if (apps == null || apps.size() == 0) {
-				logger.info("No developers apps found.");
-                return;
-			}
+        } catch (IOException e) {
+            throw new MojoFailureException("Apigee network call error " +
+                    e.getMessage());
+        }
+    }
 
-            logger.debug(apps.toString());
-			doUpdate(apps);				
-			
-		} catch (MojoFailureException e) {
-			throw e;
-		} catch (RuntimeException e) {
-			throw e;
-		}
-	}
+    /**
+     * Entry point for the mojo.
+     */
+    public void execute() throws MojoExecutionException, MojoFailureException {
 
-    /***************************************************************************
+        if (super.isSkip()) {
+            getLog().info("Skipping");
+            return;
+        }
+
+        Logger logger = LoggerFactory.getLogger(AppMojo.class);
+
+        init();
+
+        if (buildOption == OPTIONS.none) {
+            logger.info("Skipping Apps (default action)");
+            return;
+        }
+
+        if (serverProfile.getEnvironment() == null) {
+            throw new MojoExecutionException(
+                    "Apigee environment not found in profile");
+        }
+
+        Map<String, List<String>> apps = getOrgConfigWithId(logger, "developerApps");
+        if (apps == null || apps.size() == 0) {
+            logger.info("No developers apps found.");
+            return;
+        }
+
+        logger.debug(apps.toString());
+        doUpdate(apps);
+    }
+
+    /**
      * REST call wrappers
-     **/
-    public static String createApp(ServerProfile profile, 
-                                    String developerId,
-                                    String app)
-            throws IOException {
-
-        HttpResponse response = RestUtil.createOrgConfig(profile, 
-                                        "developers/" + developerId + "/apps",
-                                         app);
+     */
+    private static void createApp(ServerProfile profile, String developerId, String app) throws IOException {
+        HttpResponse response = RestUtil.createOrgConfig(profile, "developers/" + developerId + "/apps", app);
         try {
-
-            logger.info("Response " + response.getContentType() + "\n" +
-                                        response.parseAsString());
-            if (response.isSuccessStatusCode())
-            	logger.info("Create Success.");
-
+            logger.info("Response " + response.getContentType() + "\n" + response.parseAsString());
+            if (response.isSuccessStatusCode()) {
+                logger.info("Create Success.");
+            }
         } catch (HttpResponseException e) {
             logger.error("App create error " + e.getMessage());
             throw new IOException(e.getMessage());
         }
-
-        return "";
     }
 
-    public static String updateApp(ServerProfile profile,
-                                    String developerId, 
-                                    String appName, 
-                                    String app)
+    private static void updateApp(ServerProfile profile,
+                                  String developerId,
+                                  String appName,
+                                  String app)
             throws IOException {
 
-        HttpResponse response = RestUtil.updateOrgConfig(profile, 
-                                        "developers/" + developerId + "/apps", 
-                                        appName,
-                                        app);
+        HttpResponse response = RestUtil.updateOrgConfig(profile,
+                "developers/" + developerId + "/apps",
+                appName,
+                app);
         try {
-            
+
             logger.info("Response " + response.getContentType() + "\n" +
-                                        response.parseAsString());
+                    response.parseAsString());
             if (response.isSuccessStatusCode())
-            	logger.info("Update Success.");
+                logger.info("Update Success.");
 
         } catch (HttpResponseException e) {
             logger.error("App update error " + e.getMessage());
             throw new IOException(e.getMessage());
         }
 
-        return "";
     }
 
-    public static String deleteApp(ServerProfile profile,
-                                    String developerId, 
-                                    String appName)
+    private static void deleteApp(ServerProfile profile,
+                                  String developerId,
+                                  String appName)
             throws IOException {
 
-        HttpResponse response = RestUtil.deleteOrgConfig(profile, 
-                                        "developers/" + developerId + "/apps", 
-                                        appName);
+        HttpResponse response = RestUtil.deleteOrgConfig(profile,
+                "developers/" + developerId + "/apps",
+                appName);
         try {
-            
+
             logger.info("Response " + response.getContentType() + "\n" +
-                                        response.parseAsString());
+                    response.parseAsString());
             if (response.isSuccessStatusCode())
                 logger.info("Delete Success.");
 
@@ -302,15 +262,14 @@ public class AppMojo extends GatewayAbstractMojo
             throw new IOException(e.getMessage());
         }
 
-        return "";
     }
 
-    public static List getApp(ServerProfile profile, String developerId)
+    private static List getApp(ServerProfile profile, String developerId)
             throws IOException {
 
-        HttpResponse response = RestUtil.getOrgConfig(profile, 
-                                        "developers/" + developerId + "/apps");
-        if(response == null) return new ArrayList();
+        HttpResponse response = RestUtil.getOrgConfig(profile,
+                "developers/" + developerId + "/apps");
+        if (response == null) return new ArrayList();
 
         JSONArray apps = null;
         try {
@@ -323,11 +282,11 @@ public class AppMojo extends GatewayAbstractMojo
              * converting it to an JSON object as a workaround */
             String obj = "{ \"apps\": " + payload + "}";
 
-            JSONParser parser = new JSONParser();                
-            JSONObject obj1     = (JSONObject)parser.parse(obj);
-            apps    = (JSONArray)obj1.get("apps");
+            JSONParser parser = new JSONParser();
+            JSONObject obj1 = (JSONObject) parser.parse(obj);
+            apps = (JSONArray) obj1.get("apps");
 
-        } catch (ParseException pe){
+        } catch (ParseException pe) {
             logger.error("Get App parse error " + pe.getMessage());
             throw new IOException(pe.getMessage());
         } catch (HttpResponseException e) {
@@ -336,7 +295,7 @@ public class AppMojo extends GatewayAbstractMojo
         }
 
         return apps;
-    }	
+    }
 }
 
 

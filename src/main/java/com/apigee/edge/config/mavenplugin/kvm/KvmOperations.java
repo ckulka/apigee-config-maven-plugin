@@ -2,7 +2,7 @@ package com.apigee.edge.config.mavenplugin.kvm;
 
 import com.google.api.client.http.HttpResponse;
 import com.google.api.client.http.HttpResponseException;
-import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugin.MojoExecutionException;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -12,35 +12,35 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
-public abstract class KvmOperations {
+abstract class KvmOperations {
 
     private static Logger logger = LoggerFactory.getLogger(KvmOperations.class);
 
-    public abstract HttpResponse getEntriesForKvm(KvmValueObject kvmValueObject, String kvmEntryName) throws IOException;
+    protected abstract HttpResponse getEntriesForKvm(KvmValueObject kvmValueObject, String kvmEntryName) throws IOException;
 
-    public abstract HttpResponse updateKvmEntries(KvmValueObject kvmValueObject, String kvmEntryName, String kvmEntryValue) throws IOException;
+    protected abstract HttpResponse updateKvmEntries(KvmValueObject kvmValueObject, String kvmEntryName, String kvmEntryValue) throws IOException;
 
-    public abstract HttpResponse updateKvmEntriesForNonCpsOrg(KvmValueObject kvmValueObject) throws IOException;
+    protected abstract HttpResponse updateKvmEntriesForNonCpsOrg(KvmValueObject kvmValueObject) throws IOException;
 
-    public abstract HttpResponse createKvmEntries(KvmValueObject kvmValueObject, String kvmEntryValue) throws IOException;
+    protected abstract HttpResponse createKvmEntries(KvmValueObject kvmValueObject, String kvmEntryValue) throws IOException;
 
 
-    public void update(KvmValueObject kvmValueObject)
-            throws IOException, MojoFailureException {
+    void update(KvmValueObject kvmValueObject)
+            throws IOException, MojoExecutionException {
 
         if(isOrgCpsEnabled(kvmValueObject)){
             updateKvmForCpsOrg(kvmValueObject);
-        }else {
+        } else {
             updateKvmForNonCpsOrg(kvmValueObject);
         }
 
     }
 
-    private Boolean isOrgCpsEnabled(KvmValueObject kvmValueObject) throws MojoFailureException {
+    private Boolean isOrgCpsEnabled(KvmValueObject kvmValueObject) throws MojoExecutionException {
         return kvmValueObject.getProfile().getCpsEnabled();
     }
 
-    private void updateKvmForCpsOrg(KvmValueObject kvmValueObject) throws MojoFailureException, IOException {
+    private void updateKvmForCpsOrg(KvmValueObject kvmValueObject) throws MojoExecutionException, IOException {
         JSONArray entries = getEntriesConfig(kvmValueObject.getKvm());
         HttpResponse response;
 
@@ -89,7 +89,7 @@ public abstract class KvmOperations {
         }
     }
 
-    private static JSONArray getEntriesConfig(String kvm) throws MojoFailureException {
+    private static JSONArray getEntriesConfig(String kvm) throws MojoExecutionException {
         JSONParser parser = new JSONParser();
         JSONObject entry;
         try {
@@ -97,8 +97,7 @@ public abstract class KvmOperations {
             return (JSONArray) entry.get("entry");
         } catch(ParseException ex) {
             logger.info(ex.getMessage());
-            throw new MojoFailureException("Error parsing " +
-                    ex.getMessage());
+            throw new MojoExecutionException("Error parsing " + ex.getMessage());
         }
     }
 

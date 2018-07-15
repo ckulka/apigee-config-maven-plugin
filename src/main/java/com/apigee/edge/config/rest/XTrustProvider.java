@@ -45,9 +45,8 @@ package com.apigee.edge.config.rest;
  */
 import java.security.AccessController; 
 import java.security.InvalidAlgorithmParameterException; 
-import java.security.KeyStore; 
-import java.security.KeyStoreException; 
-import java.security.PrivilegedAction; 
+import java.security.KeyStore;
+import java.security.PrivilegedAction;
 import java.security.Security; 
 import java.security.cert.X509Certificate; 
   
@@ -57,14 +56,14 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactorySpi; 
 import javax.net.ssl.X509TrustManager; 
   
-public final class XTrustProvider extends java.security.Provider
+final class XTrustProvider extends java.security.Provider
 { 
     private final static String NAME = "XTrustJSSE"; 
     private final static String INFO =
         "XTrust JSSE Provider (implements trust factory with truststore validation disabled)"; 
     private final static double VERSION = 1.0D; 
      
-    public XTrustProvider()
+    private XTrustProvider()
    { 
        super(NAME, VERSION, INFO); 
         
@@ -88,11 +87,11 @@ public final class XTrustProvider extends java.security.Provider
        } 
     } 
      
-    public final static class TrustManagerFactoryImpl extends TrustManagerFactorySpi
+    final static class TrustManagerFactoryImpl extends TrustManagerFactorySpi
    { 
-       public TrustManagerFactoryImpl() { } 
-       public static String getAlgorithm() { return "XTrust509"; } 
-       protected void engineInit(KeyStore keystore) throws KeyStoreException { } 
+       TrustManagerFactoryImpl() { }
+       static String getAlgorithm() { return "XTrust509"; }
+       protected void engineInit(KeyStore keystore) { }
        protected void engineInit(ManagerFactoryParameters mgrparams)
          throws InvalidAlgorithmParameterException
       { 

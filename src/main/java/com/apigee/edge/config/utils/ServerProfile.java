@@ -18,7 +18,7 @@ package com.apigee.edge.config.utils;
 import com.apigee.edge.config.rest.RestUtil;
 import com.google.api.client.http.HttpResponse;
 import com.google.api.client.http.HttpResponseException;
-import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugin.MojoExecutionException;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -210,21 +210,21 @@ public class ServerProfile {
 
 	/**
 	 * @return cpsEnabled is CPS org
+	 * @throws MojoExecutionException if failed to find org features
 	 */
-	public Boolean getCpsEnabled() throws MojoFailureException {
+	public Boolean getCpsEnabled() throws MojoExecutionException {
 		if (this.cpsEnabled == null) {
 			try {
 				HashMap<String,String> features = queryOrgFeatures(this);
 				if (features != null &&
 						features.get("features.isCpsEnabled") != null &&
 						features.get("features.isCpsEnabled").equals("true")) {
-					this.cpsEnabled = new Boolean(true);
+					this.cpsEnabled = Boolean.TRUE;
 				} else {
-					this.cpsEnabled = new Boolean(false);
+					this.cpsEnabled = Boolean.FALSE;
 				}
 			} catch (Exception e) {
-				throw new MojoFailureException(
-						"Error finding org features. Check if user can access /organizations");
+				throw new MojoExecutionException("Error finding org features. Check if user can access /organizations");
 			}
 		}
 
@@ -261,13 +261,9 @@ public class ServerProfile {
 			}
 			return organizationProfileMap;
 
-		} catch (ParseException pe){
+		} catch (ParseException | HttpResponseException pe){
 			logger.error("Org properties check error " + pe.getMessage());
 			throw new IOException(pe.getMessage());
-		} catch (HttpResponseException e) {
-			logger.error("Org properties check error " + e.getMessage());
-			throw new IOException(e.getMessage());
 		}
-	}
-
+    }
 }

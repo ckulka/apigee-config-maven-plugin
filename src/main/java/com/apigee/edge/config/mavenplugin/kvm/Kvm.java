@@ -1,12 +1,12 @@
 package com.apigee.edge.config.mavenplugin.kvm;
 
-import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugin.MojoExecutionException;
 
 import java.io.IOException;
 
 public interface Kvm {
 
-    public void update(KvmValueObject kvmValueObject)
-            throws IOException, MojoFailureException;
+    void update(KvmValueObject kvmValueObject)
+            throws IOException, MojoExecutionException;
 
 }

@@ -1,7 +1,5 @@
 package com.apigee.edge.config.mavenplugin;
 
-import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.MojoFailureException;
 import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,7 +18,7 @@ class GatewayAbstractMojoTest {
         gatewayAbstractMojo = new GatewayAbstractMojo() {
 
             @Override
-            public void execute() throws MojoExecutionException, MojoFailureException {
+            public void execute() {
                 // Noop
             }
         };
@@ -28,13 +26,13 @@ class GatewayAbstractMojoTest {
     }
 
     @Test
-    void findConfigFileWithMissingFile() throws MojoExecutionException {
+    void findConfigFileWithMissingFile() {
         File actual = gatewayAbstractMojo.findConfigFile("./", "findConfigFileWithMissingFile");
         Assert.assertNull(actual);
     }
 
     @Test
-    void findConfigFile() throws MojoExecutionException {
+    void findConfigFile() {
         File actual = gatewayAbstractMojo.findConfigFile("./", "findConfigFile");
         Assert.assertNotNull(actual);
         Path expected = Paths.get("src/test/resources", getClass().getName(), "./findConfigFile.json");
@@ -42,7 +40,7 @@ class GatewayAbstractMojoTest {
     }
 
     @Test
-    void findConfigFileFromYaml() throws MojoExecutionException {
+    void findConfigFileFromYaml() {
         File actual = gatewayAbstractMojo.findConfigFile("./", "findConfigFileFromYaml");
         Assert.assertNotNull(actual);
         Path expected = Paths.get("src/test/resources", getClass().getName(), "./findConfigFileFromYaml.yaml");

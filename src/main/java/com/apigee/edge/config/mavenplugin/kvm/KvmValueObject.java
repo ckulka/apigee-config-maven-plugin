@@ -40,11 +40,11 @@ public class KvmValueObject {
         this.api = api;
     }
 
-    public String getKvmName() {
+    String getKvmName() {
         return kvmName;
     }
 
-    public String getKvm() {
+    String getKvm() {
         return kvm;
     }
 

@@ -15,6 +15,7 @@
  */
 package com.apigee.edge.config.mavenplugin;
 
+import org.apache.maven.plugins.annotations.Parameter;
 import org.slf4j.Logger;
 
 import java.io.File;
@@ -30,32 +31,31 @@ import org.apache.maven.plugin.AbstractMojo;
 
 import org.apache.maven.plugin.MojoExecutionException;
 
-public abstract class GatewayAbstractMojo extends AbstractMojo {
+abstract class GatewayAbstractMojo extends AbstractMojo {
 
 	/**
 	 * Directory containing the build files.
-	 * 
+	 *
 	 * @parameter property="project.build.directory"
 	 */
 	private File buildDirectory;
 	
 	/**
 	 * Base directory of the project.
-	 * 
-	 * @parameter property="basedir"
 	 */
+	@Parameter(property = "basedir")
 	private File baseDirectory;
 
 	/**
 	 * Project Name
-	 * 
+	 *
 	 * @parameter property="project.name"
 	 */
 	private String projectName;
 	
 	/**
 	 * Project version
-	 * 
+	 *
 	 * @parameter property="project.version"
 	 */
 	private String projectVersion;
@@ -69,9 +69,8 @@ public abstract class GatewayAbstractMojo extends AbstractMojo {
 	
 	/**
 	 * Profile id
-	 * 
-	 * @parameter property="apigee.profile"
 	 */
+	@Parameter(property = "apigee.profile")
 	private String id;
 	
 
@@ -121,107 +120,91 @@ public abstract class GatewayAbstractMojo extends AbstractMojo {
 
 	/**
 	 * Build option
-	 * 
-	 * @parameter property="build.option"
 	 */
+	@Parameter(property = "build.option")
 	private String buildOption;
 	
 	
 	/**
 	 * Gateway options
-	 * 
-	 * @parameter property="apigee.config.options"
 	 */
+	@Parameter(property = "apigee.config.options")
 	private String options;
 
     /**
 	 * Config dir
-	 * @parameter property="apigee.config.dir"
  	 */
+    @Parameter(property = "apigee.config.dir")
 	private String configDir;
 	
 	/**
 	 * Export dir for Apigee Dev App Keys
-	 * 
-	 * @parameter property="apigee.config.exportDir"
 	 */
+	@Parameter(property = "apigee.config.exportDir")
 	private String exportDir;
 	
 	/**
 	 * Mgmt API OAuth token endpoint
-	 * 
-	 * @parameter expression="${apigee.tokenurl}" default-value="https://login.apigee.com/oauth/token"
 	 */
+	@Parameter(property = "apigee.tokenurl", defaultValue = "https://login.apigee.com/oauth/token")
 	private String tokenURL;
 
 	/**
 	 * Mgmt API OAuth MFA - TOTP
-	 * 
-	 * @parameter expression="${apigee.mfatoken}"
 	 */
+	@Parameter(property = "apigee.mfatoken")
 	private String mfaToken;
 
 	/**
 	 * Mgmt API authn type
-	 * 
-	 * @parameter expression="${apigee.authtype}" default-value="basic"
 	 */
+	@Parameter(property = "apigee.authtype", defaultValue = "basic")
 	private String authType;
 	
 	/**
 	 * Gateway bearer token
-	 * 
-	 * @parameter expression="${apigee.bearer}"
 	 */
+	@Parameter(property = "apigee.bearer")
 	private String bearer;
 	
 	/**
 	 * Gateway refresh token
-	 * 
-	 * @parameter expression="${apigee.refresh}"
 	 */
+	@Parameter(property = "apigee.refresh")
 	private String refresh;
 	
 	/**
 	 * Gateway OAuth clientId
-	 * 
-	 * @parameter expression="${apigee.clientid}"
 	 */
+	@Parameter(property = "apigee.clientid")
 	private String clientid;
 	
 	/**
 	 * Gateway OAuth clientSecret
-	 * 
-	 * @parameter expression="${apigee.clientsecret}"
 	 */
+	@Parameter(property = "apigee.clientsecret")
 	private String clientsecret;
 	
 	// TODO set resources/edge as default value
 
-	public String getExportDir() {
+	String getExportDir() {
 		return exportDir;
 	}
 
-	public void setExportDir(String exportDir) {
-		this.exportDir = exportDir;
-	}
-
 	/**
-	* Skip running this plugin.
-	* Default is false.
-	*
-	* @parameter default-value="false"
+	* Skip running this plugin. Default is false.
 	*/
+	@Parameter(property = "skip", defaultValue = "false")
 	private boolean skip = false;
 
-	public ServerProfile buildProfile;
+	private ServerProfile buildProfile;
 
 	public GatewayAbstractMojo(){
 		super();
 		
 	}
 
-	public ServerProfile getProfile() {
+	ServerProfile getProfile() {
 		this.buildProfile = new ServerProfile();
 		this.buildProfile.setOrg(this.orgName);
 		this.buildProfile.setApplication(this.projectName);
@@ -250,27 +233,11 @@ public abstract class GatewayAbstractMojo extends AbstractMojo {
         this.configDir = configDir;
     }
 
-	public void setBaseDirectory(File baseDirectory) {
-		this.baseDirectory = baseDirectory;
-	}
-
-	public String getBuildDirectory() {
-		return this.buildDirectory.getAbsolutePath(); 
-	}
-
-	public String getBaseDirectoryPath(){
+	String getBaseDirectoryPath(){
 		return this.baseDirectory.getAbsolutePath();
 	}
 
-	public String getBuildOption() {
-		return buildOption;
-	}
-
-	public void setBuildOption(String buildOption) {
-		this.buildOption = buildOption;
-	}
-
-	public String getOptions() {
+	String getOptions() {
 		return options;
 	}
 
@@ -294,13 +261,8 @@ public abstract class GatewayAbstractMojo extends AbstractMojo {
 	}
 
 
-	public boolean isSkip() {
+	boolean isSkip() {
 		return skip;
-	}
-
-
-	public void setSkip(boolean skip) {
-		this.skip = skip;
 	}
 
 	private File findConsolidatedConfigFile() {
@@ -402,7 +364,7 @@ public abstract class GatewayAbstractMojo extends AbstractMojo {
 	/*
 	*  env picked from maven profile
 	*  No support for maven profile names itself */
-	protected List getEnvConfig(Logger logger, String config)
+	List getEnvConfig(Logger logger, String config)
 			throws MojoExecutionException {
 		File configFile;
 		String scope = "env" + File.separator + this.buildProfile.getEnvironment();
@@ -444,7 +406,7 @@ public abstract class GatewayAbstractMojo extends AbstractMojo {
 		}
 	}
 
-	protected List getOrgConfig(Logger logger, String config)
+	List getOrgConfig(Logger logger, String config)
 			throws MojoExecutionException {
 		File configFile;
 		String scope = "org";

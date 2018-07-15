@@ -15,45 +15,41 @@
  */
 package com.apigee.edge.config.rest;
 
-import java.io.IOException;
 import java.security.cert.X509Certificate;
 
-import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocket;
 
 import org.apache.axis2.transport.nhttp.HostnameVerifier;
 
-public class FakeHostnameVerifier implements HostnameVerifier {
+class FakeHostnameVerifier implements HostnameVerifier {
 
-	public void check(String arg0, SSLSocket arg1) throws IOException {
+	public void check(String arg0, SSLSocket arg1) {
 		// TODO Auto-generated method stub
 		
 	}
 
-	public void check(String arg0, X509Certificate arg1) throws SSLException {
+	public void check(String arg0, X509Certificate arg1) {
 		// TODO Auto-generated method stub
 		
 	}
 
-	public void check(String[] arg0, SSLSocket arg1) throws IOException {
+	public void check(String[] arg0, SSLSocket arg1) {
 		// TODO Auto-generated method stub
 		
 	}
 
-	public void check(String[] arg0, X509Certificate arg1) throws SSLException {
+	public void check(String[] arg0, X509Certificate arg1) {
 		// TODO Auto-generated method stub
 		
 	}
 
-	public void check(String arg0, String[] arg1, String[] arg2)
-			throws SSLException {
+	public void check(String arg0, String[] arg1, String[] arg2) {
 		// TODO Auto-generated method stub
 		
 	}
 
-	public void check(String[] arg0, String[] arg1, String[] arg2)
-			throws SSLException {
+	public void check(String[] arg0, String[] arg1, String[] arg2) {
 		// TODO Auto-generated method stub
 		
 	}

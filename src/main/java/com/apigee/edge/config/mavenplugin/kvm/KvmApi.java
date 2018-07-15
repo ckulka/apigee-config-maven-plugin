@@ -2,7 +2,7 @@ package com.apigee.edge.config.mavenplugin.kvm;
 
 import com.apigee.edge.config.rest.RestUtil;
 import com.google.api.client.http.HttpResponse;
-import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugin.MojoExecutionException;
 
 import java.io.IOException;
 
@@ -50,7 +50,7 @@ public class KvmApi extends KvmOperations implements Kvm {
 
     @Override
     public void update(KvmValueObject kvmValueObject)
-            throws IOException, MojoFailureException {
+            throws IOException, MojoExecutionException {
         super.update(kvmValueObject);
     }
 }
