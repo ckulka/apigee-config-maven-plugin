@@ -18,7 +18,8 @@ package com.apigee.edge.config.mavenplugin;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 
-/**                                                                                                                                     ¡¡
+/**
+ * ¡¡
  * A duplicate goal for kvms. Refer KVMMojo
  * scope: org, env, api
  *

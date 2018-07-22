@@ -6,7 +6,7 @@ import java.io.IOException;
 
 public interface Kvm {
 
-    void update(KvmValueObject kvmValueObject)
-            throws IOException, MojoExecutionException;
+  void update(KvmValueObject kvmValueObject)
+      throws IOException, MojoExecutionException;
 
 }

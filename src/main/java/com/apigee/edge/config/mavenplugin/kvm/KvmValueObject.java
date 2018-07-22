@@ -4,48 +4,48 @@ import com.apigee.edge.config.utils.ServerProfile;
 
 public class KvmValueObject {
 
-    private ServerProfile profile;
-    private String api;
-    private String kvmName;
-    private String kvm;
+  private ServerProfile profile;
+  private String api;
+  private String kvmName;
+  private String kvm;
 
-    public KvmValueObject(ServerProfile profile, String api, String kvmName, String kvm) {
-        this.profile = profile;
-        this.api = api;
-        this.kvmName = kvmName;
-        this.kvm = kvm;
-    }
+  public KvmValueObject(ServerProfile profile, String api, String kvmName, String kvm) {
+    this.profile = profile;
+    this.api = api;
+    this.kvmName = kvmName;
+    this.kvm = kvm;
+  }
 
-    public KvmValueObject(ServerProfile profile, String kvmName, String kvm) {
+  public KvmValueObject(ServerProfile profile, String kvmName, String kvm) {
 
-        this.profile = profile;
-        this.kvmName = kvmName;
-        this.kvm = kvm;
+    this.profile = profile;
+    this.kvmName = kvmName;
+    this.kvm = kvm;
 
-    }
+  }
 
-    public ServerProfile getProfile() {
-        return profile;
-    }
+  public ServerProfile getProfile() {
+    return profile;
+  }
 
-    public void setProfile(ServerProfile profile) {
-        this.profile = profile;
-    }
+  public void setProfile(ServerProfile profile) {
+    this.profile = profile;
+  }
 
-    public String getApi() {
-        return api;
-    }
+  public String getApi() {
+    return api;
+  }
 
-    public void setApi(String api) {
-        this.api = api;
-    }
+  public void setApi(String api) {
+    this.api = api;
+  }
 
-    String getKvmName() {
-        return kvmName;
-    }
+  String getKvmName() {
+    return kvmName;
+  }
 
-    String getKvm() {
-        return kvm;
-    }
+  String getKvm() {
+    return kvm;
+  }
 
 }

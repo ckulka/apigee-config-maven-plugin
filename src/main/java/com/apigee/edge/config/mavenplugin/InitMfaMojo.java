@@ -31,15 +31,15 @@ import org.apache.maven.plugins.annotations.Mojo;
 @Execute(lifecycle = "validate")
 class InitMfaMojo extends GatewayAbstractMojo {
 
-    /**
-     * Entry point for the mojo.
-     */
-    public void execute() throws MojoExecutionException {
-        try {
-            RestUtil.initMfa(this.getProfile());
-        } catch (Exception e) {
-            throw new MojoExecutionException("", e);
-        }
+  /**
+   * Entry point for the mojo.
+   */
+  public void execute() throws MojoExecutionException {
+    try {
+      RestUtil.initMfa(this.getProfile());
+    } catch (Exception e) {
+      throw new MojoExecutionException("", e);
     }
+  }
 
 }

@@ -7,41 +7,41 @@ import org.springframework.stereotype.Service;
 
 @Service("fileService")
 public class FileService {
-	
-	@Value("${mgmt.host}")
-    private String mgmtHost;
-	
-	@Value("${mgmt.login.url}")
-    private String mgmtloginUrl;
- 
-    @Value("${mgmt.login.client.id}")
-    private String clientId;
-    
-    @Value("${mgmt.login.client.secret}")
-    private String clientSecret;
- 
-    @Autowired
-    private Environment environment;
 
-	public String getMgmtHost() {
-		return mgmtHost;
-	}
+  @Value("${mgmt.host}")
+  private String mgmtHost;
 
-	public String getMgmtloginUrl() {
-		return mgmtloginUrl;
-	}
+  @Value("${mgmt.login.url}")
+  private String mgmtloginUrl;
 
-	public String getClientId() {
-		return clientId;
-	}
+  @Value("${mgmt.login.client.id}")
+  private String clientId;
 
-	public String getClientSecret() {
-		return clientSecret;
-	}
+  @Value("${mgmt.login.client.secret}")
+  private String clientSecret;
 
-	public Environment getEnvironment() {
-		return environment;
-	}
+  @Autowired
+  private Environment environment;
+
+  public String getMgmtHost() {
+    return mgmtHost;
+  }
+
+  public String getMgmtloginUrl() {
+    return mgmtloginUrl;
+  }
+
+  public String getClientId() {
+    return clientId;
+  }
+
+  public String getClientSecret() {
+    return clientSecret;
+  }
+
+  public Environment getEnvironment() {
+    return environment;
+  }
 
 	/*public void readValues() {
         System.out.println("Getting property via Spring Environment :"
@@ -50,6 +50,6 @@ public class FileService {
         System.out.println("mgmtHost : " + mgmtHost);
          
     }*/
-    
-    
+
+
 }

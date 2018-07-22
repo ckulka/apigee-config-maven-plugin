@@ -37,7 +37,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-/**                                                                                                                                     ¡¡
+/**
+ * ¡¡
  * Goal to attach flow hooks in Apigee EDGE
  * scope: env
  *
@@ -45,206 +46,206 @@ import java.util.List;
  */
 @Mojo(name = "flowhooks", defaultPhase = LifecyclePhase.INSTALL)
 public class FlowHookMojo extends GatewayAbstractMojo {
-    private static Logger logger = LoggerFactory.getLogger(FlowHookMojo.class);
-    private static final String ____ATTENTION_MARKER____ =
-            "************************************************************************";
+  private static Logger logger = LoggerFactory.getLogger(FlowHookMojo.class);
+  private static final String ____ATTENTION_MARKER____ =
+      "************************************************************************";
 
-    enum OPTIONS {
-        none, create, update, delete, sync
+  enum OPTIONS {
+    none, create, update, delete, sync
+  }
+
+  private OPTIONS buildOption = OPTIONS.none;
+
+  private ServerProfile serverProfile;
+
+  static class FlowHook {
+    @Key
+    String name;
+  }
+
+  private void init() {
+    try {
+      logger.info(____ATTENTION_MARKER____);
+      logger.info("Apigee Flow Hook");
+      logger.info(____ATTENTION_MARKER____);
+
+      String options = "";
+      serverProfile = super.getProfile();
+
+      options = super.getOptions();
+      if (options != null) {
+        buildOption = OPTIONS.valueOf(options);
+      }
+      logger.debug("Build option " + buildOption.name());
+      logger.debug("Base dir " + super.getBaseDirectoryPath());
+    } catch (IllegalArgumentException e) {
+      throw new RuntimeException("Invalid apigee.option provided");
     }
 
-    private OPTIONS buildOption = OPTIONS.none;
+  }
 
-    private ServerProfile serverProfile;
+  private String getFlowhookName(String payload) throws MojoFailureException {
+    Gson gson = new Gson();
+    try {
+      FlowHook flowHook = gson.fromJson(payload, FlowHook.class);
+      return flowHook.name;
+    } catch (JsonParseException e) {
+      throw new MojoFailureException(e.getMessage());
+    }
+  }
 
-    static class FlowHook {
-        @Key
-        String name;
+  /**
+   * FlowHooks
+   */
+  private void doUpdate(List<String> flowhooks) throws MojoFailureException {
+    try {
+      //List existingFlowhooks = null;
+      if (buildOption != OPTIONS.update &&
+          buildOption != OPTIONS.create &&
+          buildOption != OPTIONS.delete &&
+          buildOption != OPTIONS.sync) {
+        return;
+      }
+
+      for (String flowhook : flowhooks) {
+        String flowhookName = getFlowhookName(flowhook);
+        if (flowhookName == null) {
+          throw new IllegalArgumentException(
+              "Flowhook does not have a name.\n" + flowhook + "\n");
+        }
+        switch (buildOption) {
+          case update:
+            logger.info("Updating Flowhook " + flowhookName);
+            createUpdateFlowhook(serverProfile, flowhookName, flowhook, "Update");
+            break;
+          case create:
+            logger.info("Attaching Flowhook " + flowhookName);
+            createUpdateFlowhook(serverProfile, flowhookName, flowhook, "Create");
+            break;
+          case delete:
+            logger.info("Detaching Flowhook " + flowhookName);
+            deleteFlowhook(serverProfile, flowhookName, flowhook);
+            break;
+          case sync:
+            logger.info("Detaching Flowhook " + flowhookName);
+            deleteFlowhook(serverProfile, flowhookName, flowhook);
+            logger.info("Attaching Flowhook " + flowhookName);
+            createUpdateFlowhook(serverProfile, flowhookName, flowhook, "Create");
+            break;
+        }
+      }
+
+    } catch (IOException e) {
+      throw new MojoFailureException("Apigee network call error " +
+          e.getMessage());
+    }
+  }
+
+  /**
+   * Entry point for the mojo.
+   */
+  public void execute() throws MojoExecutionException, MojoFailureException {
+
+    if (super.isSkip()) {
+      getLog().info("Skipping");
+      return;
     }
 
-    private void init() {
-        try {
-            logger.info(____ATTENTION_MARKER____);
-            logger.info("Apigee Flow Hook");
-            logger.info(____ATTENTION_MARKER____);
+    Logger logger = LoggerFactory.getLogger(FlowHookMojo.class);
 
-            String options = "";
-            serverProfile = super.getProfile();
+    init();
 
-            options = super.getOptions();
-            if (options != null) {
-                buildOption = OPTIONS.valueOf(options);
-            }
-            logger.debug("Build option " + buildOption.name());
-            logger.debug("Base dir " + super.getBaseDirectoryPath());
-        } catch (IllegalArgumentException e) {
-            throw new RuntimeException("Invalid apigee.option provided");
-        }
-
+    if (buildOption == OPTIONS.none) {
+      logger.info("Skipping Flow Hooks (default action)");
+      return;
     }
 
-    private String getFlowhookName(String payload) throws MojoFailureException {
-        Gson gson = new Gson();
-        try {
-            FlowHook flowHook = gson.fromJson(payload, FlowHook.class);
-            return flowHook.name;
-        } catch (JsonParseException e) {
-            throw new MojoFailureException(e.getMessage());
-        }
+    if (serverProfile.getEnvironment() == null) {
+      throw new MojoExecutionException(
+          "Apigee environment not found in profile");
     }
 
-    /**
-     * FlowHooks
-     */
-    private void doUpdate(List<String> flowhooks) throws MojoFailureException {
-        try {
-            //List existingFlowhooks = null;
-            if (buildOption != OPTIONS.update &&
-                    buildOption != OPTIONS.create &&
-                    buildOption != OPTIONS.delete &&
-                    buildOption != OPTIONS.sync) {
-                return;
-            }
-
-            for (String flowhook : flowhooks) {
-                String flowhookName = getFlowhookName(flowhook);
-                if (flowhookName == null) {
-                    throw new IllegalArgumentException(
-                            "Flowhook does not have a name.\n" + flowhook + "\n");
-                }
-                switch (buildOption) {
-                    case update:
-                        logger.info("Updating Flowhook " + flowhookName);
-                        createUpdateFlowhook(serverProfile, flowhookName, flowhook, "Update");
-                        break;
-                    case create:
-                        logger.info("Attaching Flowhook " + flowhookName);
-                        createUpdateFlowhook(serverProfile, flowhookName, flowhook, "Create");
-                        break;
-                    case delete:
-                        logger.info("Detaching Flowhook " + flowhookName);
-                        deleteFlowhook(serverProfile, flowhookName, flowhook);
-                        break;
-                    case sync:
-                        logger.info("Detaching Flowhook " + flowhookName);
-                        deleteFlowhook(serverProfile, flowhookName, flowhook);
-                        logger.info("Attaching Flowhook " + flowhookName);
-                        createUpdateFlowhook(serverProfile, flowhookName, flowhook, "Create");
-                        break;
-                }
-            }
-
-        } catch (IOException e) {
-            throw new MojoFailureException("Apigee network call error " +
-                    e.getMessage());
-        }
+    List flowhooks = getEnvConfig(logger, "flowhooks");
+    if (flowhooks == null || flowhooks.size() == 0) {
+      logger.info("No flowhooks config found.");
+      return;
     }
 
-    /**
-     * Entry point for the mojo.
-     */
-    public void execute() throws MojoExecutionException, MojoFailureException {
+    doUpdate(flowhooks);
+  }
 
-        if (super.isSkip()) {
-            getLog().info("Skipping");
-            return;
-        }
+  /***************************************************************************
+   * REST call wrappers
+   **/
 
-        Logger logger = LoggerFactory.getLogger(FlowHookMojo.class);
+  private static void createUpdateFlowhook(ServerProfile profile, String flowhookName, String flowhook, String operation)
+      throws IOException {
 
-        init();
+    HttpResponse response = RestUtil.updateEnvConfig(profile, "flowhooks", flowhookName, flowhook);
+    try {
 
-        if (buildOption == OPTIONS.none) {
-            logger.info("Skipping Flow Hooks (default action)");
-            return;
-        }
+      logger.info("Response " + response.getContentType() + "\n" + response.parseAsString());
+      if (response.isSuccessStatusCode())
+        logger.info(operation + " Success.");
 
-        if (serverProfile.getEnvironment() == null) {
-            throw new MojoExecutionException(
-                    "Apigee environment not found in profile");
-        }
-
-        List flowhooks = getEnvConfig(logger, "flowhooks");
-        if (flowhooks == null || flowhooks.size() == 0) {
-            logger.info("No flowhooks config found.");
-            return;
-        }
-
-        doUpdate(flowhooks);
+    } catch (HttpResponseException e) {
+      logger.error("flowhook " + operation + " error " + e.getMessage());
+      throw new IOException(e.getMessage());
     }
 
-    /***************************************************************************
-     * REST call wrappers
-     **/
+  }
 
-    private static void createUpdateFlowhook(ServerProfile profile, String flowhookName, String flowhook, String operation)
-            throws IOException {
+  private static void deleteFlowhook(ServerProfile profile,
+                                     String flowhookName,
+                                     String flowhook)
+      throws IOException {
 
-        HttpResponse response = RestUtil.updateEnvConfig(profile, "flowhooks", flowhookName, flowhook);
-        try {
+    HttpResponse response = RestUtil.deleteEnvConfig(profile, "flowhooks",
+        flowhookName, flowhook);
+    try {
 
-            logger.info("Response " + response.getContentType() + "\n" + response.parseAsString());
-            if (response.isSuccessStatusCode())
-                logger.info(operation + " Success.");
+      logger.info("Response " + response.getContentType() + "\n" +
+          response.parseAsString());
+      if (response.isSuccessStatusCode())
+        logger.info("Delete Success.");
 
-        } catch (HttpResponseException e) {
-            logger.error("flowhook " + operation + " error " + e.getMessage());
-            throw new IOException(e.getMessage());
-        }
-
+    } catch (HttpResponseException e) {
+      logger.error("Flowhook delete error " + e.getMessage());
+      throw new IOException(e.getMessage());
     }
 
-    private static void deleteFlowhook(ServerProfile profile,
-                                       String flowhookName,
-                                       String flowhook)
-            throws IOException {
+  }
 
-        HttpResponse response = RestUtil.deleteEnvConfig(profile, "flowhooks",
-                flowhookName, flowhook);
-        try {
+  public static List getFlowhook(ServerProfile profile)
+      throws IOException {
 
-            logger.info("Response " + response.getContentType() + "\n" +
-                    response.parseAsString());
-            if (response.isSuccessStatusCode())
-                logger.info("Delete Success.");
+    HttpResponse response = RestUtil.getEnvConfig(profile, "flowhooks");
+    if (response == null) return new ArrayList();
+    JSONArray flowhooks = null;
+    try {
+      logger.debug("output " + response.getContentType());
+      // response can be read only once
+      String payload = response.parseAsString();
+      logger.debug(payload);
 
-        } catch (HttpResponseException e) {
-            logger.error("Flowhook delete error " + e.getMessage());
-            throw new IOException(e.getMessage());
-        }
+      /* Parsers fail to parse a string array.
+       * converting it to an JSON object as a workaround */
+      String obj = "{ \"flowhooks\": " + payload + "}";
 
+      JSONParser parser = new JSONParser();
+      JSONObject obj1 = (JSONObject) parser.parse(obj);
+      flowhooks = (JSONArray) obj1.get("flowhooks");
+
+    } catch (ParseException pe) {
+      logger.error("Get flowhook parse error " + pe.getMessage());
+      throw new IOException(pe.getMessage());
+    } catch (HttpResponseException e) {
+      logger.error("Get flowhook error " + e.getMessage());
+      throw new IOException(e.getMessage());
     }
 
-    public static List getFlowhook(ServerProfile profile)
-            throws IOException {
-
-        HttpResponse response = RestUtil.getEnvConfig(profile, "flowhooks");
-        if (response == null) return new ArrayList();
-        JSONArray flowhooks = null;
-        try {
-            logger.debug("output " + response.getContentType());
-            // response can be read only once
-            String payload = response.parseAsString();
-            logger.debug(payload);
-
-            /* Parsers fail to parse a string array.
-             * converting it to an JSON object as a workaround */
-            String obj = "{ \"flowhooks\": " + payload + "}";
-
-            JSONParser parser = new JSONParser();
-            JSONObject obj1 = (JSONObject) parser.parse(obj);
-            flowhooks = (JSONArray) obj1.get("flowhooks");
-
-        } catch (ParseException pe) {
-            logger.error("Get flowhook parse error " + pe.getMessage());
-            throw new IOException(pe.getMessage());
-        } catch (HttpResponseException e) {
-            logger.error("Get flowhook error " + e.getMessage());
-            throw new IOException(e.getMessage());
-        }
-
-        return flowhooks;
-    }
+    return flowhooks;
+  }
 }
 
 

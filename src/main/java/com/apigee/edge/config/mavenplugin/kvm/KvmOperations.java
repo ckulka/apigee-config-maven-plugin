@@ -14,113 +14,113 @@ import java.io.IOException;
 
 abstract class KvmOperations {
 
-    private static Logger logger = LoggerFactory.getLogger(KvmOperations.class);
+  private static Logger logger = LoggerFactory.getLogger(KvmOperations.class);
 
-    protected abstract HttpResponse getEntriesForKvm(KvmValueObject kvmValueObject, String kvmEntryName) throws IOException;
+  protected abstract HttpResponse getEntriesForKvm(KvmValueObject kvmValueObject, String kvmEntryName) throws IOException;
 
-    protected abstract HttpResponse updateKvmEntries(KvmValueObject kvmValueObject, String kvmEntryName, String kvmEntryValue) throws IOException;
+  protected abstract HttpResponse updateKvmEntries(KvmValueObject kvmValueObject, String kvmEntryName, String kvmEntryValue) throws IOException;
 
-    protected abstract HttpResponse updateKvmEntriesForNonCpsOrg(KvmValueObject kvmValueObject) throws IOException;
+  protected abstract HttpResponse updateKvmEntriesForNonCpsOrg(KvmValueObject kvmValueObject) throws IOException;
 
-    protected abstract HttpResponse createKvmEntries(KvmValueObject kvmValueObject, String kvmEntryValue) throws IOException;
+  protected abstract HttpResponse createKvmEntries(KvmValueObject kvmValueObject, String kvmEntryValue) throws IOException;
 
 
-    void update(KvmValueObject kvmValueObject)
-            throws IOException, MojoExecutionException {
+  void update(KvmValueObject kvmValueObject)
+      throws IOException, MojoExecutionException {
 
-        if(isOrgCpsEnabled(kvmValueObject)){
-            updateKvmForCpsOrg(kvmValueObject);
-        } else {
-            updateKvmForNonCpsOrg(kvmValueObject);
-        }
-
+    if (isOrgCpsEnabled(kvmValueObject)) {
+      updateKvmForCpsOrg(kvmValueObject);
+    } else {
+      updateKvmForNonCpsOrg(kvmValueObject);
     }
 
-    private Boolean isOrgCpsEnabled(KvmValueObject kvmValueObject) throws MojoExecutionException {
-        return kvmValueObject.getProfile().getCpsEnabled();
+  }
+
+  private Boolean isOrgCpsEnabled(KvmValueObject kvmValueObject) throws MojoExecutionException {
+    return kvmValueObject.getProfile().getCpsEnabled();
+  }
+
+  private void updateKvmForCpsOrg(KvmValueObject kvmValueObject) throws MojoExecutionException, IOException {
+    JSONArray entries = getEntriesConfig(kvmValueObject.getKvm());
+    HttpResponse response;
+
+    for (Object entry : entries) {
+
+      JSONObject entryJson = ((JSONObject) entry);
+      String entryName = (String) entryJson.get("name");
+
+
+      if (doesEntryAlreadyExistForOrg(kvmValueObject, entryName)) {
+        response = updateKvmEntries(kvmValueObject, entryName, entryJson.toJSONString());
+      } else {
+        response = createKvmEntries(kvmValueObject, entryJson.toJSONString());
+      }
+
+      try {
+
+        logger.info("Response " + response.getContentType() + "\n" +
+            response.parseAsString());
+
+        if (response.isSuccessStatusCode())
+          logger.info("KVM Entry Update Success: " + entryName);
+
+      } catch (HttpResponseException e) {
+        logger.error("KVM update error " + e.getMessage());
+        throw new IOException(e.getMessage());
+      }
     }
+    logger.info("KVM Update Success: " + kvmValueObject.getKvmName());
+  }
 
-    private void updateKvmForCpsOrg(KvmValueObject kvmValueObject) throws MojoExecutionException, IOException {
-        JSONArray entries = getEntriesConfig(kvmValueObject.getKvm());
-        HttpResponse response;
+  private void updateKvmForNonCpsOrg(KvmValueObject kvmValueObject)
+      throws IOException {
 
-        for (Object entry: entries){
+    HttpResponse response = updateKvmEntriesForNonCpsOrg(kvmValueObject);
+    try {
 
-            JSONObject entryJson = ((JSONObject) entry);
-            String entryName = (String) entryJson.get("name");
+      logger.info("Response " + response.getContentType() + "\n" +
+          response.parseAsString());
+      if (response.isSuccessStatusCode())
+        logger.info("Update Success.");
 
-
-            if(doesEntryAlreadyExistForOrg(kvmValueObject, entryName)){
-                response = updateKvmEntries(kvmValueObject, entryName, entryJson.toJSONString());
-            }else{
-                response = createKvmEntries(kvmValueObject, entryJson.toJSONString());
-            }
-
-            try {
-
-                logger.info("Response " + response.getContentType() + "\n" +
-                        response.parseAsString());
-
-                if (response.isSuccessStatusCode())
-                    logger.info("KVM Entry Update Success: " + entryName);
-
-            } catch (HttpResponseException e) {
-                logger.error("KVM update error " + e.getMessage());
-                throw new IOException(e.getMessage());
-            }
-        }
-        logger.info("KVM Update Success: " + kvmValueObject.getKvmName());
+    } catch (HttpResponseException e) {
+      logger.error("KVM update error " + e.getMessage());
+      throw new IOException(e.getMessage());
     }
+  }
 
-    private void updateKvmForNonCpsOrg(KvmValueObject kvmValueObject)
-            throws IOException {
-
-        HttpResponse response = updateKvmEntriesForNonCpsOrg(kvmValueObject);
-        try {
-
-            logger.info("Response " + response.getContentType() + "\n" +
-                    response.parseAsString());
-            if (response.isSuccessStatusCode())
-                logger.info("Update Success.");
-
-        } catch (HttpResponseException e) {
-            logger.error("KVM update error " + e.getMessage());
-            throw new IOException(e.getMessage());
-        }
+  private static JSONArray getEntriesConfig(String kvm) throws MojoExecutionException {
+    JSONParser parser = new JSONParser();
+    JSONObject entry;
+    try {
+      entry = (JSONObject) parser.parse(kvm);
+      return (JSONArray) entry.get("entry");
+    } catch (ParseException ex) {
+      logger.info(ex.getMessage());
+      throw new MojoExecutionException("Error parsing " + ex.getMessage());
     }
+  }
 
-    private static JSONArray getEntriesConfig(String kvm) throws MojoExecutionException {
-        JSONParser parser = new JSONParser();
-        JSONObject entry;
-        try {
-            entry = (JSONObject) parser.parse(kvm);
-            return (JSONArray) entry.get("entry");
-        } catch(ParseException ex) {
-            logger.info(ex.getMessage());
-            throw new MojoExecutionException("Error parsing " + ex.getMessage());
-        }
-    }
+  private boolean doesEntryAlreadyExistForOrg(KvmValueObject kvmValueObject, String kvmEntryName) {
+    try {
 
-    private boolean doesEntryAlreadyExistForOrg(KvmValueObject kvmValueObject, String kvmEntryName)  {
-        try {
+      HttpResponse response = getEntriesForKvm(kvmValueObject, kvmEntryName);
 
-            HttpResponse response = getEntriesForKvm(kvmValueObject, kvmEntryName);
-
-            if (response == null) {
-                return false;
-            }
-
-            logger.info("Response " + response.getContentType() + "\n" +
-                    response.parseAsString());
-
-            if (response.isSuccessStatusCode()) {
-                return true;
-            }
-
-        } catch (IOException e) {
-            logger.error("Get KVM Entry error " + e.getMessage());
-        }
-
+      if (response == null) {
         return false;
+      }
+
+      logger.info("Response " + response.getContentType() + "\n" +
+          response.parseAsString());
+
+      if (response.isSuccessStatusCode()) {
+        return true;
+      }
+
+    } catch (IOException e) {
+      logger.error("Get KVM Entry error " + e.getMessage());
     }
+
+    return false;
+  }
 }
