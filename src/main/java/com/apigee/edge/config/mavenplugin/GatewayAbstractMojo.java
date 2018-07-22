@@ -233,6 +233,10 @@ abstract class GatewayAbstractMojo extends AbstractMojo {
         this.configDir = configDir;
     }
 
+	void setBaseDirectory(File baseDirectory) {
+		this.baseDirectory = baseDirectory;
+	}
+
 	String getBaseDirectoryPath(){
 		return this.baseDirectory.getAbsolutePath();
 	}
@@ -265,12 +269,18 @@ abstract class GatewayAbstractMojo extends AbstractMojo {
 		return skip;
 	}
 
-	private File findConsolidatedConfigFile() {
+	File findConsolidatedConfigFile() {
 		File configFile = new File(getBaseDirectoryPath() + File.separator +
 									"edge.json");
 		if (configFile.exists()) {
 			return configFile;
 		}
+
+		File yamlFile = Paths.get(getBaseDirectoryPath(), "edge.yaml").toFile();
+		if (yamlFile.isFile()) {
+			return yamlFile;
+		}
+
 		return null;
 	}
 
@@ -316,10 +326,10 @@ abstract class GatewayAbstractMojo extends AbstractMojo {
 
 		if (configFile == null) {
 			logger.info("No edge.json found.");
-			throw new MojoExecutionException("config file edge.json not found");
+			throw new MojoExecutionException("config file edge.(json|yaml) not found");
 		}
 
-		logger.debug("Retrieving config from edge.json");
+		logger.debug("Retrieving config from edge.(json|yaml)");
 		try {
 
 			return ConsolidatedConfigReader.getAPIConfig(configFile,
@@ -483,5 +493,4 @@ abstract class GatewayAbstractMojo extends AbstractMojo {
 			throw new MojoExecutionException(e.getMessage());
 		}
 	}
-
 }

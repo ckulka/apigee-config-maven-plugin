@@ -78,6 +78,9 @@ orgConfig:
     quotaInterval: "1"
     quotaTimeUnit: month
     scopes: []
+  - name: myOtherProduct
+    displayName: My other product
+    description: This is my other awesome product
   developers:
   - attributes: []
     email: hugh@example.com

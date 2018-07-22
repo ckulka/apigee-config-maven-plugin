@@ -78,6 +78,9 @@ orgConfig:
     quotaInterval: "1"
     quotaTimeUnit: month
     scopes: []
+  - name: myOtherProduct
+    displayName: My other product
+    description: This is my other awesome product
   developers:
   - attributes: []
     email: hugh@example.com
@@ -119,6 +122,31 @@ orgConfig:
 apiConfig:
   forecastweatherapi:
     kvms:
+    - entry:
+      - name: EXCHANGE
+        value: "0.5"
+      - name: OTHEREXCHANGE
+        value: "1"
+      name: exchange_config
+    - name: my_other_config
+      entry:
+      - name: MYNAME
+        value: MYVALUE
+      - name: MYOTHERNAME
+        value: MYOTHERVALUE
+    maskconfigs:
+    - name: default
+      xPathsRequest:
+      - /apigee:Greeting/apigee:User
+      xPathsResponse:
+      - /apigee:Greeting/apigee:User
+    resourcefiles:
+    - name: test-api.js
+      type: jsc
+      revision: 1
+      file: ./resources/edge/api/forecastweatherapi/resourceFiles/jsc/test.js
+  myotherapi:
+    kvms:
     - name: AUTH_ERROR_CODES
       entry:
       - name: COMPANY
@@ -135,4 +163,4 @@ apiConfig:
     - name: test-api.js
       type: jsc
       revision: 1
-      file: ./resources/edge/api/forecastweatherapi/resourceFiles/jsc/test.js
+      file: ./resources/edge/api/myotherapi/resourceFiles/jsc/test.js

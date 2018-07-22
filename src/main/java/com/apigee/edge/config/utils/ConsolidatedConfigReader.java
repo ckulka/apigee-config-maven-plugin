@@ -17,13 +17,10 @@ package com.apigee.edge.config.utils;
 
 import java.io.File;
 import java.io.BufferedReader;
-import java.util.List;
-import java.util.Set;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Iterator;
+import java.util.*;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,6 +62,10 @@ public class ConsolidatedConfigReader {
         JSONParser parser = new JSONParser();
         ArrayList out = null;    
         try {
+            if (configFile.getName().endsWith(".yaml")) {
+                return getEnvConfigFromYaml(env, configFile, scope, resource);
+            }
+
             BufferedReader bufferedReader = new BufferedReader(
                 new java.io.FileReader(configFile));
 
@@ -93,6 +94,24 @@ public class ConsolidatedConfigReader {
         return out;
     }
 
+    private static List<String> getEnvConfigFromYaml(String env, File configFile, String scope, String resource) throws IOException {
+        Map yaml = new ObjectMapper(new YAMLFactory()).readValue(configFile, Map.class);
+        Optional<List> configs = Optional.ofNullable(yaml.get(scope))
+                .map(o -> ((Map) o).get(env))
+                .map(o -> (List) ((Map) o).get(resource));
+
+        if (!configs.isPresent()) {
+            return null;
+        }
+
+        ObjectMapper om = new ObjectMapper();
+        List<String> out = new ArrayList<>();
+        for (Object config : configs.get()) {
+            out.add(om.writeValueAsString(config));
+        }
+        return out;
+    }
+
         /**
          * Example Hierarchy
          * orgConfig.apiProducts
@@ -114,6 +133,10 @@ public class ConsolidatedConfigReader {
         JSONParser parser = new JSONParser();
         ArrayList out = null;    
         try {
+            if (configFile.getName().endsWith(".yaml")) {
+                return getOrgConfigFromYaml(configFile, scope, resource);
+            }
+
             BufferedReader bufferedReader = new BufferedReader(
                 new java.io.FileReader(configFile));
 
@@ -139,6 +162,23 @@ public class ConsolidatedConfigReader {
         return out;
     }
 
+    private static List<String> getOrgConfigFromYaml(File configFile, String scope, String resource) throws IOException {
+        Map yaml = new ObjectMapper(new YAMLFactory()).readValue(configFile, Map.class);
+        Optional<List> configs = Optional.ofNullable(yaml.get(scope))
+                .map(o -> (List) ((Map) o).get(resource));
+
+        if (!configs.isPresent()) {
+            return null;
+        }
+
+        ObjectMapper om = new ObjectMapper();
+        List<String> out = new ArrayList<>();
+        for (Object config : configs.get()) {
+            out.add(om.writeValueAsString(config));
+        }
+        return out;
+    }
+
     /**
      * Example Hierarchy
      * orgConfig.developerApps.{developerId}.apps
@@ -161,6 +201,10 @@ public class ConsolidatedConfigReader {
         Map <String, List<String>> out = null;
         List<String> outStrs = null;
         try {
+            if (configFile.getName().endsWith(".yaml")) {
+                return getOrgConfigWithIdFromYaml(configFile, scope, resource);
+            }
+
             BufferedReader bufferedReader = new BufferedReader(
                 new java.io.FileReader(configFile));
 
@@ -197,6 +241,27 @@ public class ConsolidatedConfigReader {
         return out;
     }
 
+    private static Map<String, List<String>> getOrgConfigWithIdFromYaml(File configFile, String scope, String resource) throws IOException {
+        Map yaml = new ObjectMapper(new YAMLFactory()).readValue(configFile, Map.class);
+        Optional<Map> map = Optional.ofNullable(yaml.get(scope))
+                .map(o -> (Map) ((Map) o).get(resource));
+
+        if (!map.isPresent()) {
+            return null;
+        }
+
+        ObjectMapper om = new ObjectMapper();
+        Map<String, List<String>> out = new HashMap<>();
+
+        for (Object key : map.get().keySet()) {
+            out.put((String) key, new LinkedList<>());
+            for (Object v : (List) map.get().get(key)) {
+                out.get(key).add(om.writeValueAsString(v));
+            }
+        }
+        return out;
+    }
+
     /**
      * List of APIs under apiConfig
      *
@@ -213,6 +278,10 @@ public class ConsolidatedConfigReader {
         JSONParser parser = new JSONParser();
         ArrayList<String> out = null;    
         try {
+            if (configFile.getName().endsWith(".yaml")) {
+                return getAPIListFromYaml(configFile);
+            }
+
             BufferedReader bufferedReader = new BufferedReader(
                 new java.io.FileReader(configFile));
 
@@ -238,6 +307,13 @@ public class ConsolidatedConfigReader {
         }
     }
 
+    public static Set getAPIListFromYaml(File configFile) throws IOException {
+        Map yaml = new ObjectMapper(new YAMLFactory()).readValue(configFile, Map.class);
+        return Optional.ofNullable(yaml.get("apiConfig"))
+                .map(o -> ((Map) o).keySet())
+                .orElse(null);
+    }
+
 
     /**
      * @param configFile configuration file
@@ -257,6 +333,10 @@ public class ConsolidatedConfigReader {
         JSONParser parser = new JSONParser();
         ArrayList out = null;    
         try {
+            if (configFile.getName().endsWith(".yaml")) {
+                return getAPIConfigFromYaml(configFile, api, resource);
+            }
+
             BufferedReader bufferedReader = new BufferedReader(
                 new java.io.FileReader(configFile));
 
@@ -285,4 +365,21 @@ public class ConsolidatedConfigReader {
         return out;
     }
 
+    private static List<String> getAPIConfigFromYaml(File configFile, String api, String resource) throws IOException {
+        Map yaml = new ObjectMapper(new YAMLFactory()).readValue(configFile, Map.class);
+        Optional<List> configs = Optional.ofNullable(yaml.get("apiConfig"))
+                .map(o -> ((Map) o).get(api))
+                .map(o -> (List) ((Map) o).get(resource));
+
+        if (!configs.isPresent()) {
+            return null;
+        }
+
+        ObjectMapper om = new ObjectMapper();
+        List<String> out = new ArrayList<>();
+        for (Object config : configs.get()) {
+            out.add(om.writeValueAsString(config));
+        }
+        return out;
+    }
 }
