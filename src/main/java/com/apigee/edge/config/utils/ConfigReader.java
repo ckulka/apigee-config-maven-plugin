@@ -2,16 +2,10 @@ package com.apigee.edge.config.utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -32,9 +26,8 @@ public class ConfigReader {
    * @param configFile configuration file
    * @return list of [ {cache1}, {cache2}, {cache3} ]
    * @throws IOException    IOException
-   * @throws ParseException ParseException
    */
-  public static List getEnvConfig(String env, File configFile) throws ParseException, IOException {
+  public static List getEnvConfig(String env, File configFile) throws IOException {
     return getListConfig(configFile);
   }
 
@@ -44,45 +37,17 @@ public class ConfigReader {
    * @param configFile configuration file
    * @return List of JSON strings, e.g. [ {apiProduct1}, {apiProduct2}, {apiProduct3} ]
    * @throws IOException    IOException
-   * @throws ParseException ParseException
    */
 
   // TODO convert parse exception error message more human friendly
-  public static List getOrgConfig(File configFile) throws ParseException, IOException {
+  public static List getOrgConfig(File configFile) throws IOException {
     return getListConfig(configFile);
   }
 
-  private static List getListConfig(File configFile) throws IOException, ParseException {
+  private static List getListConfig(File configFile) throws IOException {
     Logger logger = LoggerFactory.getLogger(ConfigReader.class);
     try {
-      if (configFile.getName().endsWith(".yaml")) {
-        return getOrgConfigFromYaml(configFile);
-      } else {
-        return getOrgConfigFromJson(configFile);
-      }
-    } catch (IOException | ParseException ie) {
-      logger.info(ie.getMessage());
-      throw ie;
-    }
-  }
 
-  private static List<String> getOrgConfigFromJson(File file) throws IOException, ParseException {
-    BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
-
-    JSONParser parser = new JSONParser();
-    JSONArray configs = (JSONArray) parser.parse(bufferedReader);
-    if (configs == null) {
-      return null;
-    }
-
-    List<String> out = new ArrayList<>();
-    for (Object config : configs) {
-      out.add(((JSONObject) config).toJSONString());
-    }
-    return out;
-  }
-
-  private static List<String> getOrgConfigFromYaml(File configFile) throws IOException {
     ObjectMapper yamlReader = new ObjectMapper(new YAMLFactory());
     ObjectMapper om = new ObjectMapper();
     List<String> out = new ArrayList<>();
@@ -90,7 +55,11 @@ public class ConfigReader {
       out.add(om.writeValueAsString(config));
     }
     return out;
-  }
+  }catch(IOException e) {
+            logger.info(e.getMessage());
+            throw e;
+        }
+    }
 
   /**
    * Example Hierarchy
@@ -99,42 +68,12 @@ public class ConfigReader {
    * @param configFile configuration file
    * @return Map of developerId: [ {app1}, {app2}, {app3} ]
    * @throws IOException    IOException
-   * @throws ParseException ParseException
    */
-  public static Map<String, List<String>> getOrgConfigWithId(File configFile) throws ParseException, IOException {
+  public static Map<String, List<String>> getOrgConfigWithId(File configFile) throws IOException {
     Logger logger = LoggerFactory.getLogger(ConfigReader.class);
 
     try {
-      if (configFile.getName().endsWith(".yaml")) {
-        return getOrgConfigWithIdFromYaml(configFile);
-      } else {
-        return getOrgConfigWithIdFromJson(configFile);
-      }
-    } catch (IOException | ParseException ie) {
-      logger.info(ie.getMessage());
-      throw ie;
-    }
-  }
 
-  private static Map<String, List<String>> getOrgConfigWithIdFromJson(File configFile) throws IOException, ParseException {
-    BufferedReader bufferedReader = new BufferedReader(new FileReader(configFile));
-    Map<?, ?> sConfig = (Map) new JSONParser().parse(bufferedReader);
-    if (sConfig == null) {
-      return null;
-    }
-
-    // orgConfig.developerApps.<developerId>
-    Map<String, List<String>> out = new HashMap<>();
-    for (Object key : sConfig.keySet()) {
-      out.put((String) key, new LinkedList<>());
-      for (Object conf : (JSONArray) sConfig.get(key)) {
-        out.get(key).add(((JSONObject) conf).toJSONString());
-      }
-    }
-    return out;
-  }
-
-  private static Map<String, List<String>> getOrgConfigWithIdFromYaml(File configFile) throws IOException {
     ObjectMapper om = new ObjectMapper();
     Map<String, List<String>> out = new HashMap<>();
 
@@ -146,7 +85,11 @@ public class ConfigReader {
       }
     }
     return out;
-  }
+  }catch(IOException e) {
+            logger.info(e.getMessage());
+            throw e;
+        }
+    }
 
   /**
    * @param apiConfigDir apiConfigDir
@@ -167,9 +110,8 @@ public class ConfigReader {
    * @param configFile configuration file
    * @return [ {apiProduct1}, {apiProduct2}, {apiProduct3} ]
    * @throws IOException    IOException
-   * @throws ParseException ParseException
    */
-  public static List getAPIConfig(File configFile) throws ParseException, IOException {
+  public static List getAPIConfig(File configFile) throws IOException {
     return getListConfig(configFile);
   }
 }
